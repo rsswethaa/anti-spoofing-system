@@ -1,44 +1,42 @@
-# Anti-Spoofing System
+# TrueFace — Multi-Signal Anti-Spoofing Lab
 
-A complete deep-learning-inspired presentation-attack detection portfolio system combining liveness evidence, auditable decisions, persistent sessions, testing and security documentation.
+A portfolio-grade **live liveness-authentication prototype**. TrueFace combines webcam FaceMesh landmarks, challenge-response behaviour and multiple explainable signals into a final liveness decision.
 
-## Included
-- explainable texture, motion, depth-consistency and challenge-response feature fusion
-- configurable spoof/genuine decision threshold
-- synthetic attack/genuine examples
-- SQLite persistence for liveness sessions, signal observations, challenges and final decisions
-- ER and data-flow diagrams
-- automated model and storage tests
-- CI
-- interface, deployment, security and model-card docs
-- full technical report
+## Product capabilities
+- live webcam face tracking using MediaPipe FaceMesh in the browser
+- challenge-response sessions: **blink twice** or **turn head**
+- blink detection from eye landmark geometry
+- head-motion signal from normalised nose trajectory
+- face-width stability as a geometry/depth-consistency proxy
+- lightweight frame-texture proxy calculated in the browser
+- weighted liveness fusion with visible score components
+- authentication-style genuine / spoof-suspected UI
+- SQLite persistence of sessions, observations, challenges and decisions
+- Flask API, Docker packaging, product tests and CI
+
+## Run
+```bash
+pip install -r requirements.txt
+python app.py
+```
+Open `http://localhost:5000`, allow webcam access, and start a challenge. Browser MediaPipe assets are loaded from jsDelivr.
 
 ## Architecture
 ```mermaid
 flowchart LR
-  C[Camera input] --> F[Face detector]
-  F --> T[Texture signal]
-  F --> M[Motion/liveness]
-  F --> D[Depth consistency]
-  F --> R[Challenge-response]
-  T --> S[Anti-spoof model]
-  M --> S
-  D --> S
-  R --> S
-  S --> DB[(Audit database)]
-  DB --> O[Genuine / Spoof decision]
+  C[Webcam] --> F[MediaPipe FaceMesh]
+  C --> T[Texture proxy]
+  F --> E[Blink geometry]
+  F --> H[Head trajectory]
+  F --> G[Face geometry stability]
+  E --> CH[Challenge response]
+  H --> CH
+  T --> X[Signal fusion]
+  G --> X
+  CH --> X
+  X --> D[Genuine / spoof-suspected decision]
+  D --> DB[(SQLite audit trail)]
 ```
 
-## Run
-```bash
-python demo.py
-python -m unittest discover -s tests -v
-```
-
-## Database
-```bash
-python -c "from src.storage import init_db; init_db('antispoof.db', seed=True)"
-```
-
-## Security boundary
-This is an educational portfolio prototype, not a certified biometric security control. No APCER/BPCER, FAR/FRR, ISO compliance or production assurance claim is made.
+## Security integrity
+This is not production biometric security and its texture/depth signals are intentionally lightweight. It does not claim PAD certification or benchmark accuracy. A production extension would need attack-specific datasets (print, replay, mask and injection attacks), APCER/BPCER evaluation, device integrity, secure capture, model calibration and adversarial testing.
