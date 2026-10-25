@@ -1,26 +1,32 @@
 # Anti-Spoofing System
 
-A deep-learning-inspired presentation-attack detection portfolio project that models how liveness, texture and challenge-response signals can be combined to distinguish genuine users from spoof attempts.
+A complete deep-learning-inspired presentation-attack detection portfolio system combining liveness evidence, auditable decisions, persistent sessions, testing and security documentation.
 
-## Features
-- explainable liveness feature vector
-- texture, motion and challenge-response signals
-- configurable decision threshold
-- spoof/genuine confidence score
-- synthetic test cases
-- CI, architecture and technical report
+## Included
+- explainable texture, motion, depth-consistency and challenge-response feature fusion
+- configurable spoof/genuine decision threshold
+- synthetic attack/genuine examples
+- SQLite persistence for liveness sessions, signal observations, challenges and final decisions
+- ER and data-flow diagrams
+- automated model and storage tests
+- CI
+- interface, deployment, security and model-card docs
+- full technical report
 
 ## Architecture
 ```mermaid
 flowchart LR
   C[Camera input] --> F[Face detector]
-  F --> T[Texture features]
-  F --> M[Motion/liveness features]
+  F --> T[Texture signal]
+  F --> M[Motion/liveness]
+  F --> D[Depth consistency]
   F --> R[Challenge-response]
   T --> S[Anti-spoof model]
   M --> S
+  D --> S
   R --> S
-  S --> D[Genuine / Spoof decision]
+  S --> DB[(Audit database)]
+  DB --> O[Genuine / Spoof decision]
 ```
 
 ## Run
@@ -29,5 +35,10 @@ python demo.py
 python -m unittest discover -s tests -v
 ```
 
-## Security note
-This is an educational portfolio prototype, not a production biometric security control. It does not claim certified presentation-attack detection performance.
+## Database
+```bash
+python -c "from src.storage import init_db; init_db('antispoof.db', seed=True)"
+```
+
+## Security boundary
+This is an educational portfolio prototype, not a certified biometric security control. No APCER/BPCER, FAR/FRR, ISO compliance or production assurance claim is made.
