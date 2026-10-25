@@ -9,6 +9,7 @@ from src.storage import add_challenge, add_observation, create_session, init_db,
 
 app = Flask(__name__)
 app.config['DATABASE'] = os.getenv('LIVENESS_DB', str(Path('instance') / 'liveness.db'))
+app.config['CNN_MODEL'] = os.getenv('CNN_MODEL', 'models/anti_spoof_cnn.pt')
 SESSIONS = {}
 
 
@@ -27,7 +28,11 @@ def index():
 
 @app.get('/health')
 def health():
-    return jsonify({'status':'ok','service':'live-anti-spoofing'})
+    return jsonify({
+        'status':'ok',
+        'service':'live-anti-spoofing',
+        'cnn_model_available':Path(app.config['CNN_MODEL']).exists(),
+    })
 
 
 @app.post('/api/session')
@@ -64,6 +69,23 @@ def frame(ref):
         save_decision(ensure_db(), session['db_id'], db_label, d['liveness_score'], d['threshold'], explanation='Live multi-signal portfolio prototype')
         session['saved'] = True
     return jsonify(result)
+
+
+@app.post('/api/cnn/score')
+def cnn_score():
+    image = request.files.get('image')
+    if not image or not image.filename:
+        return jsonify({'error':'image is required'}), 400
+    if not Path(app.config['CNN_MODEL']).exists():
+        return jsonify({'error':'CNN model is not trained/installed','hint':'See research/train_cnn.py and requirements-cnn.txt'}), 503
+    try:
+        from src.cnn_liveness import score_image_bytes
+        score = score_image_bytes(image.read(), app.config['CNN_MODEL'])
+    except (RuntimeError, FileNotFoundError) as exc:
+        return jsonify({'error':str(exc)}), 503
+    except Exception as exc:
+        return jsonify({'error':f'CNN scoring failed: {exc}'}), 400
+    return jsonify({'bona_fide_probability':round(score,6),'attack_probability':round(1-score,6),'model':Path(app.config['CNN_MODEL']).name})
 
 
 if __name__ == '__main__':
