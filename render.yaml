@@ -1,15 +1,26 @@
 services:
   - type: web
-    name: trueface-anti-spoofing
+    name: swethaa-trueface
     runtime: python
     region: singapore
     plan: free
+    branch: main
+    autoDeployTrigger: checksPass
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 2 --threads 4 app:app
+    startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120 app:app
     healthCheckPath: /health
     envVars:
-      - {key: SECRET_KEY, generateValue: true}
-      - {key: DATABASE_URL, sync: false}
-      - {key: CNN_MODEL, value: "models/anti_spoof_cnn.pt"}
-      - {key: SENTRY_DSN, sync: false}
-      - {key: RATE_LIMIT_PER_MINUTE, value: "120"}
+      - key: PYTHON_VERSION
+        value: 3.12.15
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: swethaa-portfolio-platform-db
+          property: connectionString
+      - key: CNN_MODEL
+        value: models/anti_spoof_cnn.pt
+      - key: SENTRY_DSN
+        sync: false
+      - key: RATE_LIMIT_PER_MINUTE
+        value: "120"
