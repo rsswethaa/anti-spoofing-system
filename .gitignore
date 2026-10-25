@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.venv/
+.env
+models/
+private_data/
+.DS_Store

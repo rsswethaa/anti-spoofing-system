@@ -1,0 +1,5 @@
+texture_score,motion_score,depth_consistency,challenge_response,demo_label
+0.82,0.76,0.79,0.90,genuine
+0.30,0.25,0.20,0.10,spoof
+0.71,0.66,0.74,0.80,genuine
+0.40,0.55,0.25,0.30,spoof
